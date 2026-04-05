@@ -4,8 +4,8 @@ const Header = ({ fileName = null }) => {
   return (
     <header className="h-12 w-full bg-[#0B0D12] border-b border-[#1C1F2E] flex items-center px-5 gap-3 shrink-0">
 
-      <span className="text-[14px] font-bold text-[#E2E4EF]">
-        Overview
+      <span className="text-[13px] font-bold text-[#E2E4EF]">
+        Dashboad
       </span>
 
       {/* File chip */}

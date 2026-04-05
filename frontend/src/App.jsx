@@ -1,6 +1,7 @@
 import React from 'react'
 import Sidebar from './components/Layout/Sidebar'
 import Header from './components/Layout/Header'
+import UploadFile from './components/Layout/UploadFile'
 
 const App = () => {
   return (
@@ -8,7 +9,8 @@ const App = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
-        <main className="flex-1 p-5 overflow-y-auto bg-[#0B0D12]">
+        <main className="flex-1 flex justify-center items-center overflow-y-auto bg-[#0B0D12]">
+          <UploadFile />
         </main>
       </div>
     </div>
