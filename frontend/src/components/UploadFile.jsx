@@ -1,5 +1,5 @@
 import React from 'react'
-import upload_logo from '../../assets/upload_logo.png'
+import upload_logo from '../assets/upload_logo.png'
 import { FiUpload } from "react-icons/fi";
 
 const UploadFile = () => {
