@@ -1,9 +1,12 @@
 import express from 'express';
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({
+    path: "./.env"
+});
 import cors from 'cors';
 import csv from 'csv-parser';
 import fs from 'fs';
+
 
 
 const app = express();
