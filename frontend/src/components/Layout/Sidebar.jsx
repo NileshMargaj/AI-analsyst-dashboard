@@ -1,9 +1,10 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png'
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import { BsPatchQuestion } from "react-icons/bs";
 
-const Sidebar = ({setSelectedOption}) => {
+const Sidebar = () => {
   return (
     <aside className="w-[200px] min-h-screen bg-[#0F1117] border-r border-[#1C1F2E] flex flex-col px-2.5 py-4 shrink-0 cursor-pointer">
       <section>
@@ -15,14 +16,14 @@ const Sidebar = ({setSelectedOption}) => {
         </p>
       </section>
       <section className="flex flex-col gap-2 mt-4">
-        <div className="text-[14px] text-[#E2E4EF] hover:bg-[#1C1F2E] rounded-lg px-3 py-2 transition-colors flex items-center gap-3">
+        <Link to="/upload" className="text-[14px] text-[#E2E4EF] hover:bg-[#1C1F2E] rounded-lg px-3 py-2 transition-colors flex items-center gap-3 block">
           <MdOutlineDriveFolderUpload />
-         <span onClick={() => setSelectedOption('UploadFile')}> Upload file</span>
-        </div>
-        <div className="text-[14px] text-[#E2E4EF] hover:bg-[#1C1F2E] rounded-lg px-3 py-2 transition-colors flex items-center gap-3">
+          Upload file
+        </Link>
+        <Link to="/" className="text-[14px] text-[#E2E4EF] hover:bg-[#1C1F2E] rounded-lg px-3 py-2 transition-colors flex items-center gap-3 block">
           <BsPatchQuestion />
-          <span onClick={() => setSelectedOption('Dashboard')}> Ask anything ?</span>
-        </div>
+          Ask anything ?
+        </Link>
       </section>
     </aside>
   )
