@@ -8,10 +8,10 @@ export const uploadCSV = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
     const filePath = req.file.path;
-    console.log('📁 Processing CSV:', filePath);
+    // console.log('📁 Processing CSV:', filePath);
 
     const rows = await parseCSV(filePath);
-    console.log('📊 Parsed rows count:', rows?.length || 0);
+    // console.log('📊 Parsed rows count:', rows?.length || 0);
     
     if (rows.length === 0) {
       return res.status(400).json({ error: 'CSV file is empty or invalid' });
@@ -19,7 +19,7 @@ export const uploadCSV = async (req, res) => {
 
     const firstRow = rows[0];
     const columns = firstRow ? Object.keys(firstRow) : [];
-    console.log('🏷️  Extracted columns:', columns);
+    // console.log('🏷️  Extracted columns:', columns);
 
     if (columns.length === 0) {
       return res.status(400).json({ error: 'No columns found in CSV (malformed headers?)' });
@@ -39,7 +39,7 @@ export const uploadCSV = async (req, res) => {
       throw new Error('Failed to save records to database');
     }
 
-    console.log('💾 Dataset saved:', dataset._id, '- Records count:', dataset.records.length);
+    // console.log('💾 Dataset saved:', dataset._id, '- Records count:', dataset.records.length);
     res.json({
       message: "Upload successful",
       datasetId: dataset._id,
