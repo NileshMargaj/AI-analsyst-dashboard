@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { FiUserPlus } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 const Register = ({ onSuccess }) => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,6 +33,7 @@ const Register = ({ onSuccess }) => {
         setStatus('Registration successful! You can now login.');
         if (onSuccess) onSuccess();
         setFormData({ username: '', email: '', password: '' });
+         navigate('/login');
       } else {
         setStatus(`Error: ${data.error || data.message}`);
       }
@@ -40,17 +45,17 @@ const Register = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0D12] p-8">
-      <div className="w-full max-w-md bg-[#0F1117] border border-[#1C1F2E] rounded-lg shadow-sm p-6">
-        <div className="text-center mb-8">
-          <FiUserPlus className="mx-auto text-5xl text-[#6C63FF] mb-4" />
-          <h2 className="text-2xl font-bold text-[#E2E4EF] mb-2">Register</h2>
-          <p className="text-[#5A5F7A]">Create your account</p>
+    <div className="h-[70%] w-[40%] flex items-center justify-center bg-[#0B0D12] p-5">
+      <div className="w-full max-w-md bg-[#0F1117] border border-[#1C1F2E] rounded-lg shadow-sm p-3">
+        <div className="text-center mb-3">
+          <FiUserPlus className="mx-auto text-3xl text-[#6C63FF] mb-1" />
+          <h2 className="text-xl font-bold text-[#E2E4EF] mb-1">Register</h2>
+          <p className="text-[#5A5F7A] text-sm">Create your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[#5A5F7A] mb-2">Username</label>
+            <label className="block text-sm font-medium text-[#5A5F7A] mb-1">Username</label>
             <input
               type="text"
               name="username"
@@ -59,26 +64,26 @@ const Register = ({ onSuccess }) => {
               required
               minLength="4"
               maxLength="20"
-              className="w-full px-4 py-3 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] placeholder-[#5A5F7A] focus:outline-none focus:ring-2 focus:ring-[#6C63FF] focus:border-[#6C63FF] transition"
-              placeholder="Choose a username (4-20 chars)"
+              className="w-full px-4 py-1.5 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] text-sm placeholder-[#5A5F7A] focus:outline-none  transition"
+              placeholder="Enter username (4-20 chars)"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#5A5F7A] mb-2">Email</label>
+            <label className="block text-sm font-medium text-[#5A5F7A] mb-1">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] placeholder-[#5A5F7A] focus:outline-none focus:ring-2 focus:ring-[#6C63FF] focus:border-[#6C63FF] transition"
-              placeholder="Enter your email"
+              className="w-full px-4 py-1.5 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] text-sm placeholder-[#5A5F7A] focus:outline-none  transition"
+              placeholder="Enter email"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#5A5F7A] mb-2">Password</label>
+            <label className="block text-sm font-medium text-[#5A5F7A] mb-1">Password</label>
             <input
               type="password"
               name="password"
@@ -87,8 +92,8 @@ const Register = ({ onSuccess }) => {
               required
               minLength="4"
               maxLength="12"
-              className="w-full px-4 py-3 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] placeholder-[#5A5F7A] focus:outline-none focus:ring-2 focus:ring-[#6C63FF] focus:border-[#6C63FF] transition"
-              placeholder="Create password (4-12 chars)"
+              className="w-full px-4 py-1.5 mb-2 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] text-sm placeholder-[#5A5F7A] focus:outline-none  transition"
+              placeholder="Enter password (4-12 chars)"
             />
           </div>
 
@@ -101,11 +106,11 @@ const Register = ({ onSuccess }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#6C63FF] hover:bg-[#9B94FF] text-[#E2E4EF] py-3 px-4 rounded-lg font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-[#6C63FF] hover:bg-[#403996] text-[#E2E4EF] py-2 px-4 rounded-lg font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Creating account...
               </>
             ) : (
@@ -114,9 +119,9 @@ const Register = ({ onSuccess }) => {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-[#5A5F7A]">
+        <p className="text-center mt-5 text-[#5A5F7A]">
           Already have an account?{' '}
-          <a href="#" className="text-[#6C63FF] hover:text-[#9B94FF] font-medium">Login here</a>
+          <Link to={"/login"} className="text-[#6C63FF] hover:text-[#9B94FF] font-medium">Login here</Link>
         </p>
       </div>
     </div>
