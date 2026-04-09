@@ -101,6 +101,33 @@ const loginUser = async (req, res) => {
 
 
 
+//! logout user
+const logoutUser = async (req, res, next) => {
+    try {
+        const options = {
+            httpOnly: true,
+            secure: false
+        };
+
+        return res.status(200)
+            .clearCookie("token", options)
+            .json({
+                message: "Logout successful",
+                success: true
+            });
+    } catch (error) {
+        return res.status(500).json({
+            error: "Internal server error",
+            success: false
+        });
+    }
+}
 
 
-export { registerUser, loginUser };
+
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser
+};

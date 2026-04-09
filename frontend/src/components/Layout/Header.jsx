@@ -19,41 +19,61 @@ const Header = ({ fileName = null }) => {
 
   return (
     <>
-      <header className="h-12 w-full bg-[#0B0D12] border-b border-[#1C1F2E] flex items-center px-5 gap-3 shrink-0">
+      <header className="h-14 w-full bg-gradient-to-r from-[#0B0D12] via-[#0F1117] to-[#0B0D12] border-b border-[#1C1F2E]/50 backdrop-blur-sm flex items-center px-6 gap-4 shrink-0 shadow-lg">
 
-        <span className="text-[13px] font-bold text-[#E2E4EF]">
-          Dashboard
-        </span>
-
-        {/* File chip */}
-        <div className="flex items-center gap-1.5 bg-[#161922] border border-[#252838] rounded-full px-3 py-1">
-          <div className={`w-1.5 h-1.5 rounded-full ${fileName ? 'bg-[#3DD68C]' : 'bg-[#3A3D52]'}`} />
-          <span className="text-[11px] text-[#5A5F7A]">
-            {fileName ?? 'No file loaded'}
+        {/* Logo and Title */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+            <span className="text-white font-bold text-sm">AI</span>
+          </div>
+          <span className="text-lg font-bold text-[#E2E4EF] tracking-wide">
+            Analyst Dashboard
           </span>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        {/* File Status Chip */}
+        <div className="flex items-center gap-2 bg-[#161922]/80 border border-[#252838]/60 rounded-full px-4 py-2 backdrop-blur-sm">
+          <div className={`w-2 h-2 rounded-full shadow-sm ${fileName ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-gray-400 to-gray-500'}`} />
+          <span className="text-xs text-[#9B94FF] font-medium">
+            {fileName ?? 'No dataset loaded'}
+          </span>
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Auth Section */}
+        <div className="flex items-center gap-3">
           {user ? (
             <>
-              <button 
+              <div className="flex items-center gap-2 text-xs text-[#9B94FF]">
+                <span>Welcome,</span>
+                <span className="font-medium text-[#E2E4EF]">{user.username || 'User'}</span>
+              </div>
+              <button
                 onClick={handleLogout}
-                className="text-[11px] text-[#5A5F7A] border border-[#252838] rounded-lg px-3 py-1 hover:border-red-500 hover:text-red-400 transition-colors bg-transparent"
+                className="text-xs text-[#5A5F7A] border border-[#252838]/60 rounded-lg px-3 py-1.5 hover:border-red-500/60 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 bg-transparent backdrop-blur-sm"
               >
                 Logout
               </button>
-              <div className="w-7 h-7 rounded-full bg-[#6C63FF]/10 border border-[#6C63FF]/30 flex items-center justify-center text-[9px] font-bold text-[#9B94FF]">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 border-2 border-[#1C1F2E] flex items-center justify-center text-xs font-bold text-white shadow-md">
                 {user.username?.charAt(0)?.toUpperCase() || 'U'}
               </div>
             </>
           ) : (
             <>
-            <Link to="/register" className="text-[11px] text-[#5A5F7A] border border-[#252838] rounded-lg px-3 py-1 hover:border-[#6C63FF] hover:text-[#9B94FF] transition-colors bg-transparent">
-              Register
-            </Link>
-            <Link to="/login" className="text-[11px] text-[#5A5F7A] border border-[#6C63FF] rounded-lg px-3 py-1 hover:border-[#9B94FF] hover:text-[#9B94FF] bg-[#6C63FF]/10 transition-colors">
-              Login
-            </Link>
+              <Link
+                to="/register"
+                className="text-xs text-[#9B94FF] border border-[#252838]/60 rounded-lg px-3 py-1.5 hover:border-violet-500/60 hover:text-violet-400 hover:bg-violet-500/10 transition-all duration-200 bg-transparent backdrop-blur-sm"
+              >
+                Register
+              </Link>
+              <Link
+                to="/login"
+                className="text-xs text-white border border-violet-500/60 rounded-lg px-3 py-1.5 hover:border-violet-400 hover:bg-violet-500/20 transition-all duration-200 bg-violet-500/10 backdrop-blur-sm shadow-sm"
+              >
+                Login
+              </Link>
             </>
           )}
         </div>

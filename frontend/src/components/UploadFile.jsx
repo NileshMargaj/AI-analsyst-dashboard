@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react'
 import upload_logo from '../assets/upload_logo.png'
 import { FiUpload } from "react-icons/fi";
+import { useNavigate } from 'react-router-dom';
 
 const UploadFile = () => {
   const [status, setStatus] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSuccess, setIsSuccess] = useState(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   //? Handle file select
   const handleFileSelect = (file) => {
@@ -56,6 +58,7 @@ const UploadFile = () => {
       if (response.ok) {
         setIsSuccess(true);
         setStatus(`Uploaded: ${data.datasetId}`);
+        navigate('/')
       } else {
         setIsSuccess(false);
         setStatus(`Error: ${data.error}`);
@@ -66,82 +69,93 @@ const UploadFile = () => {
   };
 
   return (
-    <section className='h-[80%] w-[40%] flex flex-col justify-around rounded-lg shadow-lg overflow-hidden'>
+    <div className="w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-[500px] sm:min-h-[550px]">
+      <section className='w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-[#0F1117] to-[#0B0D12] border border-[#1C1F2E]/50 backdrop-blur-sm'>
 
-
-      <div className='h-[40%] w-full flex flex-col items-center justify-start gap-1'>
-        <img src={upload_logo} alt="upload_logo" className='h-[100px] w-[100px]' />
-        <p className='text-[17px] font-bold text-white mb-1'>
-          Upload your file here...
-        </p>
-        <p className='text-gray-600 text-[13px]'>
-          Drag & drop or browse file
-        </p>
-      </div>
-
-
-      <div
-        onClick={() => fileInputRef.current.click()}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        className="relative h-[55%] w-full bg-[#131620] border border-dashed border-violet-200 hover:border-violet-500 rounded-lg cursor-pointer flex items-center justify-center transition"
-      >
-        <div className="h-[70%] w-[60%] flex flex-col items-center justify-evenly">
-          <FiUpload className='text-[30px] text-violet-600' />
-
-          <span className="text-gray-400 font-bold">
-            Click or Drag file here
-          </span>
-
-          <p
-            className={`text-xs ${isSuccess === null
-                ? "text-gray-400"
-                : isSuccess
-                  ? "text-green-500"
-                  : "text-red-500"
-              } px-2 py-2 rounded mt-1 w-full text-center`}
-          >
-            {status}
-          </p>
-
-          <p className='text-gray-600 mb-1 text-[13px]'>
-            Supports .PDF, .CSV
-          </p>
-
-
-          <div className="flex gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                fileInputRef.current.click();
-              }}
-              className="bg-gray-600 text-white px-4 py-1.5 text-[14px] rounded-md hover:bg-gray-700"
-            >
-              Browse
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpload();
-              }}
-              className="bg-violet-600 text-white px-4 py-1.5 text-[14px] rounded-md hover:bg-violet-700"
-            >
-              Upload
-            </button>
+        {/* Header Section */}
+        <div className='flex flex-col items-center justify-center py-4 sm:py-6 px-4 sm:px-6 space-y-2 sm:space-y-3'>
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center border border-violet-500/30">
+            <img src={upload_logo} alt="upload_logo" className='w-8 h-8 sm:w-10 sm:h-10' />
+          </div>
+          <div className="text-center space-y-1">
+            <h1 className='text-lg sm:text-xl font-bold text-[#E2E4EF]'>
+              Upload your file here
+            </h1>
+            <p className='text-[#9B94FF] text-xs sm:text-sm font-medium'>
+              Drag & drop or browse to upload
+            </p>
           </div>
         </div>
 
+        {/* Upload Area */}
+        <div
+          onClick={() => fileInputRef.current.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className="relative mx-4 sm:mx-6 mb-4 sm:mb-6 bg-gradient-to-br from-[#131620] to-[#0F1117] border-2 border-dashed border-violet-500/30 hover:border-violet-400 hover:bg-gradient-to-br hover:from-violet-500/5 hover:to-purple-500/5 rounded-xl cursor-pointer transition-all duration-300 shadow-inner group"
+        >
+          <div className="flex flex-col items-center justify-center py-6 sm:py-8 px-6 sm:px-8 space-y-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center border border-violet-500/30 group-hover:border-violet-400 transition-colors">
+              <FiUpload className='text-lg sm:text-xl text-violet-400 group-hover:text-violet-300 transition-colors' />
+            </div>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={onInputChange}
-          className="hidden"
-          accept=".csv,.pdf"
-        />
-      </div>
-    </section>
+            <div className="text-center space-y-1">
+              <p className="text-[#E2E4EF] font-semibold text-sm sm:text-base">
+                Click or Drag file here
+              </p>
+              <p className='text-[#5A5F7A] text-xs sm:text-sm font-medium'>
+                Supports .PDF, .CSV files up to 10MB
+              </p>
+            </div>
+
+            {/* Status Message */}
+            {status && (
+              <div className={`px-4 py-3 rounded-lg text-sm font-medium text-center max-w-xs ${
+                isSuccess === null
+                  ? "text-[#9B94FF] bg-[#6C63FF]/10 border border-[#6C63FF]/30"
+                  : isSuccess
+                    ? "text-green-400 bg-green-500/10 border border-green-500/30"
+                    : "text-red-400 bg-red-500/10 border border-red-500/30"
+              }`}>
+                {status}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current.click();
+                }}
+                className="flex-1 bg-[#1C1F2E] hover:bg-[#252838] text-[#9B94FF] px-3 sm:px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 border border-[#252838] hover:border-violet-500/50 hover:shadow-md"
+              >
+                Browse Files
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpload();
+                }}
+                disabled={!selectedFile}
+                className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-700 text-white px-3 sm:px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Upload File
+              </button>
+            </div>
+          </div>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={onInputChange}
+            className="hidden"
+            accept=".csv,.pdf"
+          />
+        </div>
+      </section>
+    </div>
   );
 };
 

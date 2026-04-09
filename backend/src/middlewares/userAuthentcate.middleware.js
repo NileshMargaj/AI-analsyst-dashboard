@@ -2,7 +2,16 @@ import jwt from "jsonwebtoken";
 
 const ensureIsUserAuthenticated = async (req, res, next) => {
     try {
-        const { token } = req.cookies;
+        // Check authorization header first (for API requests)
+        let token = null;
+        const authHeader = req.headers.authorization;
+        
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);  // Remove "Bearer " prefix
+        } else if (req.cookies && req.cookies.token) {
+            // Fall back to cookies (for browser sessions)
+            token = req.cookies.token;
+        }
         
         if (!token) {
             return res.status(401).json({ 

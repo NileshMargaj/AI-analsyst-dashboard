@@ -30,6 +30,8 @@ const Login = ({ onSuccess }) => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store token in localStorage
+        localStorage.setItem('token', data.token);
         setStatus('Login successful!');
         if (onSuccess) onSuccess();
         setFormData({ email: '', password: '' });

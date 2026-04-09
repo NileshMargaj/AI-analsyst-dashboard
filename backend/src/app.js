@@ -1,8 +1,4 @@
 import express from 'express';
-import dotenv from "dotenv";
-dotenv.config({
-    path: "./.env"
-});
 import cors from 'cors';
 import uploadRoutes from "./routes/upload.routes.js";
 import userRoutes from "./routes/user.routes.js";

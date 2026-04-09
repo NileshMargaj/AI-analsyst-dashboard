@@ -5,6 +5,19 @@ const datasetSchema = new mongoose.Schema({
 
   columns: [String],
 
+  // Data type schema for each column (e.g., { name: 'string', salary: 'number' })
+  schema: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+
+  // Total row count for quick reference
+  rowCount: {
+    type: Number,
+    default: 0
+  },
+
   records: [
     {
       type: Map,
