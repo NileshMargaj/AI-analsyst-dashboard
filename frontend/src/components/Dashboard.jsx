@@ -5,6 +5,8 @@ import DataExplorer from './DataExplorer'
 import GroupAnalyzer from './GroupAnalyzer'
 import AdvancedQuery from './AdvancedQuery'
 import DataExporter from './DataExporter'
+import BarChartComponent from './charts/BarChart'
+import LineChartComponent from './charts/LineChart'
 import { FaArrowRight } from "react-icons/fa";
 import { BiLoaderAlt } from 'react-icons/bi';
 import { FiAlertCircle } from 'react-icons/fi';
@@ -68,6 +70,7 @@ const Dashboard = ({ onDatasetSelect }) => {
 
     const views = [
         { id: 'analytics', label: 'Analytics', icon: '📊' },
+        { id: 'charts', label: 'Charts', icon: '📉' },
         { id: 'explorer', label: 'Data Explorer', icon: '📋' },
         { id: 'group', label: 'Group Analysis', icon: '📈' },
         { id: 'query', label: 'Advanced Query', icon: '🔍' },
@@ -83,6 +86,73 @@ const Dashboard = ({ onDatasetSelect }) => {
             );
         }
 
+        const ChartsView = ({ datasetId }) => {
+            const [chartData, setChartData] = useState({ bar: [], line: [] });
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                if (!datasetId) {
+                    setLoading(false);
+                    return;
+                }
+
+                const dummyBarData = [
+                    { name: 'Jan', value: 400 },
+                    { name: 'Feb', value: 300 },
+                    { name: 'Mar', value: 500 },
+                    { name: 'Apr', value: 450 },
+                    { name: 'May', value: 600 },
+                    { name: 'Jun', value: 550 },
+                ];
+
+                const dummyLineData = [
+                    { name: 'Week 1', value: 200 },
+                    { name: 'Week 2', value: 250 },
+                    { name: 'Week 3', value: 300 },
+                    { name: 'Week 4', value: 280 },
+                    { name: 'Week 5', value: 350 },
+                    { name: 'Week 6', value: 400 },
+                ];
+
+                const timer = setTimeout(() => {
+                    setChartData({ bar: dummyBarData, line: dummyLineData });
+                    setLoading(false);
+                }, 800);
+
+                return () => clearTimeout(timer);
+            }, [datasetId]);
+
+            if (loading) {
+                return (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
+                        <div className="bg-[#1A1D26] rounded-lg border border-gray-700 p-6 flex items-center justify-center">
+                            <BiLoaderAlt className="w-12 h-12 text-violet-500 animate-spin" />
+                        </div>
+                        <div className="bg-[#1A1D26] rounded-lg border border-gray-700 p-6 flex items-center justify-center">
+                            <BiLoaderAlt className="w-12 h-12 text-violet-500 animate-spin" />
+                        </div>
+                    </div>
+                );
+            }
+
+            if (error) {
+                return (
+                    <div className="col-span-full flex flex-col items-center justify-center p-12 bg-[#1A1D26] rounded-lg border border-gray-700 text-gray-400">
+                        <FiAlertCircle className="w-12 h-12 mb-2 text-red-400" />
+                        <p>{error}</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <BarChartComponent data={chartData.bar} loading={false} title="📊 Monthly Sales" />
+                    <LineChartComponent data={chartData.line} loading={false} title="📈 Trend Analysis" />
+                </div>
+            );
+        };
+
         switch (activeView) {
             case 'analytics':
                 return <DataAnalytics datasetId={selectedDataset} />;
@@ -94,6 +164,8 @@ const Dashboard = ({ onDatasetSelect }) => {
                 return <AdvancedQuery datasetId={selectedDataset} />;
             case 'export':
                 return <DataExporter datasetId={selectedDataset} />;
+            case 'charts':
+                return <ChartsView datasetId={selectedDataset} />;
             default:
                 return <DataAnalytics datasetId={selectedDataset} />;
         }
