@@ -6,14 +6,11 @@ import multer from 'multer';
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-
-
 const app = express();
-
 
 //! Middleware
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: ["http://localhost:5173", "http://localhost:5174"], 
   credentials: true                
 }));
 app.use(express.json());
@@ -26,7 +23,6 @@ app.use(cookieParser());
 app.use("/auth", userRoutes);
 app.use("/api", uploadRoutes);
 
-
 const multerErrorHandler = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -38,7 +34,5 @@ const multerErrorHandler = (err, req, res, next) => {
 };
 
 app.use(multerErrorHandler);
-
-
 
 export default app;
