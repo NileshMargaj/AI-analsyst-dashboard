@@ -5,7 +5,6 @@ import {
   analyzeDataset,
   queryDataset,
   getColumnStats,
-  groupAndAnalyze,
   filterAndExport,
   getDataset,
   getAllDatasets
@@ -32,8 +31,7 @@ router.get("/:datasetId/analyze", ensureIsUserAuthenticated, analyzeDataset);
 //! Get column-specific statistics
 router.get("/:datasetId/column/:columnName/stats", ensureIsUserAuthenticated, getColumnStats);
 
-//! Group and analyze data
-router.post("/:datasetId/group", ensureIsUserAuthenticated, groupAndAnalyze);
+
 
 //! Execute complex query
 router.post("/:datasetId/query", ensureIsUserAuthenticated, queryDataset);

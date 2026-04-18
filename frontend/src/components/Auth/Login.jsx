@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiLogIn } from 'react-icons/fi';
+import { FiLogIn, FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,7 @@ const Login = ({ onSuccess }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
    const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -71,15 +72,24 @@ const Login = ({ onSuccess }) => {
 
           <div>
             <label className="block text-sm font-medium text-[#5A5F7A] mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] placeholder-[#5A5F7A] focus:outline-none  transition"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 pr-12 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] placeholder-[#5A5F7A] focus:outline-none transition"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A5F7A] hover:text-[#E2E4EF] hover:opacity-70 transition p-1"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+{showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           {status && (

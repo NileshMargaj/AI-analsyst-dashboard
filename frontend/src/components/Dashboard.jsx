@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import Query from './Query'
 import DataAnalytics from './DataAnalytics'
-import DataExplorer from './DataExplorer'
-import GroupAnalyzer from './GroupAnalyzer'
 import AdvancedQuery from './AdvancedQuery'
 import DataExporter from './DataExporter'
 import BarChartComponent from './charts/BarChart'
 import LineChartComponent from './charts/LineChart'
-import { FaArrowRight } from "react-icons/fa";
+import AIQuery from './AIQuery'
 import { BiLoaderAlt } from 'react-icons/bi';
 import { FiAlertCircle } from 'react-icons/fi';
-import Card from './Card';
 
 const Dashboard = ({ onDatasetSelect }) => {
     const [datasets, setDatasets] = useState([]);
     const [selectedDataset, setSelectedDataset] = useState(null);
-    const [activeView, setActiveView] = useState('analytics');
+    const [activeView, setActiveView] = useState('ai-query'); // Default to AI
     const [loadingDatasets, setLoadingDatasets] = useState(false);
     const [error, setError] = useState(null);
 
@@ -28,7 +24,6 @@ const Dashboard = ({ onDatasetSelect }) => {
             setLoadingDatasets(true);
             const token = localStorage.getItem('token');
             
-            // Check if token exists
             if (!token) {
                 setError('Please login first to access datasets');
                 setLoadingDatasets(false);
@@ -69,97 +64,62 @@ const Dashboard = ({ onDatasetSelect }) => {
     };
 
     const views = [
+        { id: 'ai-query', label: '🤖 AI Query', icon: 'AI' },
         { id: 'analytics', label: 'Analytics', icon: '📊' },
         { id: 'charts', label: 'Charts', icon: '📉' },
-        { id: 'explorer', label: 'Data Explorer', icon: '📋' },
-        { id: 'group', label: 'Group Analysis', icon: '📈' },
-        { id: 'query', label: 'Advanced Query', icon: '🔍' },
-        { id: 'export', label: 'Export Data', icon: '💾' },
+        { id: 'export', label: 'Export', icon: '💾' },
     ];
 
     const renderView = () => {
         if (!selectedDataset) {
             return (
                 <div className="w-full flex items-center justify-center p-12">
-                    <p className="text-gray-400">No datasets available. Please upload a CSV file first.</p>
+                    <p className="text-gray-400">Upload a CSV to start analyzing with AI!</p>
                 </div>
             );
         }
 
         const ChartsView = ({ datasetId }) => {
-            const [chartData, setChartData] = useState({ bar: [], line: [] });
+            const [chartData, setChartData] = useState([]);
             const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(null);
 
             useEffect(() => {
-                if (!datasetId) {
-                    setLoading(false);
-                    return;
-                }
-
-                const dummyBarData = [
-                    { name: 'Jan', value: 400 },
-                    { name: 'Feb', value: 300 },
-                    { name: 'Mar', value: 500 },
-                    { name: 'Apr', value: 450 },
-                    { name: 'May', value: 600 },
-                    { name: 'Jun', value: 550 },
-                ];
-
-                const dummyLineData = [
-                    { name: 'Week 1', value: 200 },
-                    { name: 'Week 2', value: 250 },
-                    { name: 'Week 3', value: 300 },
-                    { name: 'Week 4', value: 280 },
-                    { name: 'Week 5', value: 350 },
-                    { name: 'Week 6', value: 400 },
-                ];
-
-                const timer = setTimeout(() => {
-                    setChartData({ bar: dummyBarData, line: dummyLineData });
-                    setLoading(false);
-                }, 800);
-
-                return () => clearTimeout(timer);
+                const fetchCharts = async () => {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`http://localhost:3000/api/${datasetId}/analyze`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const analysis = await res.json();
+                        // Sample chart data from analysis
+                        const barData = Object.entries(analysis.analysis || {}).slice(0, 5).map(([col, stats]) => ({
+                            name: col,
+                            value: stats.average || stats.sum || 0
+                        }));
+                        setChartData(barData);
+                    } catch (err) {
+                        console.error('Charts load error:', err);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                if (datasetId) fetchCharts();
             }, [datasetId]);
-
-            if (loading) {
-                return (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
-                        <div className="bg-[#1A1D26] rounded-lg border border-gray-700 p-6 flex items-center justify-center">
-                            <BiLoaderAlt className="w-12 h-12 text-violet-500 animate-spin" />
-                        </div>
-                        <div className="bg-[#1A1D26] rounded-lg border border-gray-700 p-6 flex items-center justify-center">
-                            <BiLoaderAlt className="w-12 h-12 text-violet-500 animate-spin" />
-                        </div>
-                    </div>
-                );
-            }
-
-            if (error) {
-                return (
-                    <div className="col-span-full flex flex-col items-center justify-center p-12 bg-[#1A1D26] rounded-lg border border-gray-700 text-gray-400">
-                        <FiAlertCircle className="w-12 h-12 mb-2 text-red-400" />
-                        <p>{error}</p>
-                    </div>
-                );
-            }
 
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <BarChartComponent data={chartData.bar} loading={false} title="📊 Monthly Sales" />
-                    <LineChartComponent data={chartData.line} loading={false} title="📈 Trend Analysis" />
+                    <BarChartComponent data={chartData} loading={loading} title="📊 Column Averages" />
+                    <LineChartComponent data={chartData} loading={loading} title="📈 Data Trends" />
                 </div>
             );
         };
 
         switch (activeView) {
+            case 'ai-query':
+                return <AIQuery datasetId={selectedDataset} />;
             case 'analytics':
                 return <DataAnalytics datasetId={selectedDataset} />;
-            case 'explorer':
-                return <DataExplorer datasetId={selectedDataset} />;
-            case 'group':
-                return <GroupAnalyzer datasetId={selectedDataset} />;
+
             case 'query':
                 return <AdvancedQuery datasetId={selectedDataset} />;
             case 'export':
@@ -167,101 +127,96 @@ const Dashboard = ({ onDatasetSelect }) => {
             case 'charts':
                 return <ChartsView datasetId={selectedDataset} />;
             default:
-                return <DataAnalytics datasetId={selectedDataset} />;
+                return <AIQuery datasetId={selectedDataset} />;
         }
     };
 
     return (
-        <>
-            <section className='h-full w-full p-3 space-y-4 overflow-y-auto'>
-                {/* Dataset Selection */}
-                <div className="bg-[#1A1D26] rounded-lg p-4 border border-gray-700">
-                    <label className="block text-sm text-gray-400 mb-2">Select Dataset</label>
-                    {loadingDatasets ? (
-                        <div className="flex items-center gap-2 text-gray-400">
-                            <BiLoaderAlt className="animate-spin" />
-                            <span>Loading datasets...</span>
-                        </div>
-                    ) : (
-                        <select
-                            value={selectedDataset || ''}
-                            onChange={(e) => {
-                                const datasetId = e.target.value;
-                                setSelectedDataset(datasetId);
-                                onDatasetSelect?.(datasetId, datasets);
-                            }}
-                            className="w-full bg-[#0B0D12] text-gray-300 border border-gray-700 rounded px-3 py-2"
-                        >
-                            <option value="">Choose a dataset...</option>
-                            {datasets.map((dataset) => (
-                                <option key={dataset._id} value={dataset._id}>
-                                    {dataset.fileName} ({dataset.rowCount || 0} rows)
-                                </option>
-                            ))}
-                        </select>
-                    )}
-                    {error && (
-                        <div className="text-red-400 text-sm flex items-center gap-2 mt-2">
-                            <FiAlertCircle />
-                            {error}
-                        </div>
-                    )}
-                </div>
-
-                {/* View Tabs */}
-                {selectedDataset && (
-                    <div className="bg-[#1A1D26] rounded-lg border border-gray-700 overflow-hidden">
-                        <div className="flex overflow-x-auto border-b border-gray-700">
-                            {views.map((view) => (
-                                <button
-                                    key={view.id}
-                                    onClick={() => setActiveView(view.id)}
-                                    className={`px-4 py-3 whitespace-nowrap text-sm font-medium transition-colors ${
-                                        activeView === view.id
-                                            ? 'bg-violet-600 text-white border-b-2 border-violet-600'
-                                            : 'text-gray-400 hover:text-gray-300'
-                                    }`}
-                                >
-                                    <span>{view.icon} {view.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                        
-                        <div className="p-4">
-                            {renderView()}
-                        </div>
+        <section className='h-full w-full p-3 space-y-6 overflow-y-auto'>
+            {/* Dataset Selector */}
+            <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
+                <label className="block text-sm font-medium text-gray-300 mb-3">Dataset</label>
+                {loadingDatasets ? (
+                    <div className="flex items-center gap-2 text-gray-400">
+                        <BiLoaderAlt className="animate-spin" />
+                        <span>Loading datasets...</span>
+                    </div>
+                ) : (
+                    <select
+                        value={selectedDataset || ''}
+                        onChange={(e) => {
+                            const datasetId = e.target.value;
+                            setSelectedDataset(datasetId);
+                            setActiveView('ai-query'); // Reset to AI
+                            onDatasetSelect?.(datasetId, datasets);
+                        }}
+                        className="w-full bg-[#0B0D12] border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-violet-500 focus:outline-none transition"
+                    >
+                        <option value="">Select dataset...</option>
+                        {datasets.map((dataset) => (
+                            <option key={dataset._id} value={dataset._id}>
+                                {dataset.fileName} ({dataset.rowCount?.toLocaleString() || 0} rows)
+                            </option>
+                        ))}
+                    </select>
+                )}
+                {error && (
+                    <div className="mt-3 p-3 bg-red-900/20 border border-red-500/50 rounded text-red-300 text-sm flex items-center gap-2">
+                        <FiAlertCircle />
+                        {error}
                     </div>
                 )}
+            </div>
 
-                {/* Original Content */}
-                {!selectedDataset && (
-                    <>
-                        <div className="w-full rounded-lg p-4 flex flex-col gap-4">
-                            <p className='text-white text-md font-medium'>ASK A QUESTION ?</p>
-                            <div className='w-full flex items-center gap-4'>
-                                <input type="text"
-                                    placeholder='Type your question here...'
-                                    className='py-2.5 w-[80%] pl-2.5  border border-gray-300 text-gray-300 bg-transparent focus:outline-none rounded-lg text-sm' />
-                                <button
-                                    className="py-2.5 px-5 bg-violet-600 text-white rounded-lg hover:bg-violet-700 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 flex items-center gap-2"
-                                >
-                                    <FaArrowRight className="text-sm" />
-                                    <span className="text-sm font-medium">Run</span>
-                                </button>
+            {/* AI Query - Main View */}
+            {selectedDataset ? (
+                <div className="bg-[#1A1D26] rounded-2xl border border-gray-700 p-1">
+                    <div className="flex overflow-x-auto bg-gray-900/50 rounded-xl">
+                        {views.map((view) => (
+                            <button
+                                key={view.id}
+                                onClick={() => setActiveView(view.id)}
+                                className={`px-6 py-3 whitespace-nowrap text-sm font-medium transition-all flex items-center gap-2 ${
+                                    activeView === view.id
+                                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+                                }`}
+                            >
+                                <span>{view.icon}</span>
+                                <span>{view.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="p-6">
+                        {renderView()}
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/30 p-12 rounded-2xl text-center">
+                    <h2 className="text-2xl font-bold text-white mb-4">🤖 AI Analytics Dashboard</h2>
+                    <p className="text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
+                        Upload your CSV data and ask questions in plain English. 
+                        Get instant charts, insights, and analysis powered by AI.
+                    </p>
+                    <div className="bg-[#1A1D26] p-8 rounded-xl border border-gray-700 max-w-2xl mx-auto">
+                        <h3 className="text-lg font-semibold text-violet-400 mb-4">Try these:</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 text-sm">
+                                "Top 5 products"
                             </div>
-                            <Query />
+                            <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 text-sm">
+                                "Sales by month"
+                            </div>
+                            <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-600 text-sm">
+                                "Best region"
+                            </div>
                         </div>
-                        <div className='w-full h-[200px] mt-4 rounded-lg p-4 flex items-center justify-start gap-4'>
-                            <Card title={'TOTAL REVENUE'} amount={'$2.4M'} />
-                            <Card title={'UNIT SOLD'} amount={'41,209'} />
-                            <Card title={'AVG PROFIT MARGIN'} amount={'25.5%'} />
-                            <Card title={'ACTIVE CUSTOMERS'} amount={'1,500'} />
-                        </div>
-                    </>
-                )}
-            </section>
-        </>
-    )
-}
+                    </div>
+                </div>
+            )}
+        </section>
+    );
+};
 
-export default Dashboard
+export default Dashboard;
+

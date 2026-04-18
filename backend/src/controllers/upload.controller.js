@@ -6,12 +6,11 @@ import {
   getSchema,
   filterData,
   sortData,
-  analyzeData,
   processQuery,
   summarize,
   paginate,
   getUnique,
-  countDistinct, // ✅ FIXED
+  countDistinct,
 } from "../utils/dataProcessor.js";
 
 // ✅ Convert records safely
@@ -116,6 +115,7 @@ export const analyzeDataset = async (req, res) => {
         fileName: dataset.fileName,
         rowCount: records.length,
         columns,
+        columnCount: columns.length,
         schema,
       },
       analysis,
@@ -176,34 +176,7 @@ export const getColumnStats = async (req, res) => {
 
 
 
-// ================= GROUP =================
-export const groupAndAnalyze = async (req, res) => {
-  try {
-    const { groupBy, metric } = req.body;
 
-    const dataset = await Dataset.findById(req.params.datasetId);
-    if (!dataset) {
-      return res.status(404).json({ error: "Dataset not found" });
-    }
-
-    const records = convertRecordsToPlainObjects(dataset.records);
-    const columns = getColumns(records);
-
-    if (!columns.includes(groupBy) || !columns.includes(metric)) {
-      return res.status(400).json({ error: "Invalid fields" });
-    }
-
-    const analysis = analyzeData(records, groupBy, metric);
-
-    res.json({
-      success: true,
-      analysis,
-      groupCount: Object.keys(analysis).length,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 
 
@@ -226,12 +199,14 @@ export const filterAndExport = async (req, res) => {
     }
 
     const page = Math.floor(offset / limit) + 1;
-    const { data, totalPages, totalItems } = paginate(records, page, limit);
+    const paginatedData = paginate(records, page, limit);
+    const previewData = paginatedData.length > 0 ? paginatedData : records.slice(0, limit);
 
     res.json({
       success: true,
-      data,
-      pagination: { totalItems, totalPages, page },
+      data: previewData,
+      rowCount: records.length,
+      pagination: { totalItems: records.length, totalPages: 1, page: 1 }
     });
 
   } catch (err) {

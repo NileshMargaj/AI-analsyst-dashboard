@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiUserPlus } from 'react-icons/fi';
+import { FiUserPlus, FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,7 @@ const Register = ({ onSuccess }) => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -33,7 +34,7 @@ const Register = ({ onSuccess }) => {
         setStatus('Registration successful! You can now login.');
         if (onSuccess) onSuccess();
         setFormData({ username: '', email: '', password: '' });
-         navigate('/login');
+        navigate('/login');
       } else {
         setStatus(`Error: ${data.error || data.message}`);
       }
@@ -84,17 +85,26 @@ const Register = ({ onSuccess }) => {
 
           <div>
             <label className="block text-sm font-medium text-[#5A5F7A] mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="4"
-              maxLength="12"
-              className="w-full px-4 py-1.5 mb-2 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] text-sm placeholder-[#5A5F7A] focus:outline-none  transition"
-              placeholder="Enter password (4-12 chars)"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength="4"
+                maxLength="12"
+                className="w-full px-4 py-1.5 pr-12 mb-2 bg-[#131620] border border-[#252838] rounded-lg text-[#E2E4EF] text-sm placeholder-[#5A5F7A] focus:outline-none transition"
+                placeholder="Enter password (4-12 chars)"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A5F7A] hover:text-[#E2E4EF] hover:opacity-70 transition p-1"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+              </button>
+            </div>
           </div>
 
           {status && (

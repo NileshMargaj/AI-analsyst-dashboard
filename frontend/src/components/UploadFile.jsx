@@ -49,6 +49,9 @@ const UploadFile = () => {
       setStatus('Uploading...');
       const response = await fetch('http://localhost:3000/api/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: formData,
         credentials: 'include',
       });

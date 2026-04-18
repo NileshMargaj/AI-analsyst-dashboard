@@ -68,13 +68,36 @@ export const paginate = (data, page = 1, size = 10) => {
   return (data || []).slice(start, start + size);
 };
 
-export const summarize = (data, field) => ({
-  count: count(data),
-  sum: sum(data, field),
-  average: average(data, field),
-  min: data.length ? Math.min(...data.map(r => safeNumeric(r[field]))) : 0,
-  max: data.length ? Math.max(...data.map(r => safeNumeric(r[field]))) : 0
-});
+export const summarize = (data, field) => {
+  const values = (data || []).map(r => r[field]).filter(v => v !== undefined && v !== null && v !== '');
+  const numericValues = values.map(safeNumeric).filter(v => !isNaN(v));
+  const nonEmptyValues = values.filter(v => v !== '');
+
+  return {
+    count: data.length,
+    valid: nonEmptyValues.length,
+    missing: data.length - nonEmptyValues.length,
+    distinct: countDistinct(data, field),
+    type: numericValues.length > nonEmptyValues.length * 0.5 ? 'number' : 'string',
+    sample: nonEmptyValues.slice(0, 5),
+    
+    // Numeric stats
+    ...(numericValues.length > 0 && {
+      sum: sum(data, field),
+      average: average(data, field),
+      min: Math.min(...numericValues),
+      max: Math.max(...numericValues)
+    }),
+    
+    // Categorical top values
+    ...(nonEmptyValues.length > 0 && {
+      topValues: Object.entries(groupBy(data, field))
+        .sort(([,a], [,b]) => b.length - a.length)
+        .slice(0, 3)
+        .map(([val, rows]) => ({ value: val, count: rows.length }))
+    })
+  };
+};
 
 export const analyzeData = (data, groupField, metricField) => Object.fromEntries(
   Object.entries(groupBy(data, groupField)).map(([k, rows]) => [k, summarize(rows, metricField)])

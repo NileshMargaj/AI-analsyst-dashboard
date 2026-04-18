@@ -63,6 +63,8 @@ const DataAnalytics = ({ datasetId }) => {
   }
 
   const { dataset, analysis: columnAnalysis } = analysis;
+  const columns = dataset.columns || Object.keys(columnAnalysis || {});
+  const datasetColumnCount = dataset.columnCount || columns.length;
 
   return (
     <>
@@ -82,7 +84,7 @@ const DataAnalytics = ({ datasetId }) => {
           </div>
           <div className="bg-[#0B0D12] p-4 rounded-lg">
             <p className="text-gray-400 text-sm">Columns</p>
-            <p className="text-white font-medium mt-1">{dataset.columnCount}</p>
+            <p className="text-white font-medium mt-1">{datasetColumnCount}</p>
           </div>
           <div className="bg-[#0B0D12] p-4 rounded-lg">
             <p className="text-gray-400 text-sm">Data Type</p>
@@ -95,7 +97,7 @@ const DataAnalytics = ({ datasetId }) => {
       <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
         <h3 className="text-white font-semibold mb-4">Column Statistics</h3>
         <div className="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
-          {dataset.columns.map((col) => {
+{columns.map((col) => {
             const stats = columnAnalysis[col];
             if (!stats) return null;
 
@@ -104,10 +106,10 @@ const DataAnalytics = ({ datasetId }) => {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-white font-medium">{col}</p>
-                    <p className="text-gray-400 text-sm">Type: {stats.type}</p>
+                    <p className="text-gray-400 text-sm">Type: {stats.type || 'string'}</p>
                   </div>
                   <span className="text-xs px-2 py-1 bg-violet-500/20 text-violet-400 rounded">
-                    {stats.type}
+                    {stats.type || 'string'}
                   </span>
                 </div>
 
@@ -119,12 +121,12 @@ const DataAnalytics = ({ datasetId }) => {
                   <div>
                     <p className="text-gray-500 text-xs">Missing</p>
                     <p className={stats.missing > 0 ? 'text-yellow-400' : 'text-green-400'}>
-                      {stats.missing}
+                      {stats.missing || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">Distinct</p>
-                    <p className="text-gray-300">{stats.distinct || 'N/A'}</p>
+                    <p className="text-gray-300">{stats.distinct}</p>
                   </div>
                   {stats.type === 'number' && (
                     <>
@@ -138,28 +140,35 @@ const DataAnalytics = ({ datasetId }) => {
                   )}
                 </div>
 
-                {stats.type === 'number' && (
-                  <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <p className="text-gray-500 text-xs">Min</p>
-                      <p className="text-gray-300">
-                        {typeof stats.min === 'number' ? stats.min.toFixed(2) : 'N/A'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 text-xs">Max</p>
-                      <p className="text-gray-300">
-                        {typeof stats.max === 'number' ? stats.max.toFixed(2) : 'N/A'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 text-xs">Sum</p>
-                      <p className="text-gray-300">
-                        {typeof stats.sum === 'number' ? stats.sum.toLocaleString() : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                )}
+{stats.topValues && (
+  <div className="mt-3 pt-3 border-t border-gray-700">
+    <p className="text-gray-500 text-xs mb-1">Top Values</p>
+    <div className="space-y-1">
+      {stats.topValues.map(({value, count}) => (
+        <div key={value} className="text-xs text-gray-300 flex justify-between">
+          <span>{String(value)}</span>
+          <span className="text-violet-400 font-medium">({count})</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+{stats.average !== undefined && (
+  <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-3 gap-2 text-sm">
+    <div>
+      <p className="text-gray-500 text-xs">Avg</p>
+      <p className="text-gray-300">{stats.average.toFixed(2)}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 text-xs">Min</p>
+      <p className="text-gray-300">{stats.min.toFixed(2)}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 text-xs">Max</p>
+      <p className="text-gray-300">{stats.max.toFixed(2)}</p>
+    </div>
+  </div>
+)}
               </div>
             );
           })}
