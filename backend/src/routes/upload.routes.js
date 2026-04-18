@@ -14,7 +14,10 @@ import ensureIsUserAuthenticated from "../middlewares/userAuthentcate.middleware
 
 const router = express.Router();
 
-//! Get all datasets (list view)
+//! Get all datasets (PUBLIC - no auth)
+router.get("/public", getAllDatasets);
+
+//! Get all datasets (AUTH required)
 router.get("/uploads", ensureIsUserAuthenticated, getAllDatasets);
 
 //! Upload CSV file

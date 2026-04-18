@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import uploadRoutes from "./routes/upload.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import multer from 'multer';
 import bodyParser from "body-parser";
@@ -19,9 +20,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-//! Base route
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    env_openai: !!process.env.OPENAI_API_KEY ? 'SET' : 'MISSING',
+    env_jwt: !!process.env.JWT_SECRET ? 'SET' : 'MISSING',
+    timestamp: new Date().toISOString()
+  });
+});
+
+//! Base routes
 app.use("/auth", userRoutes);
 app.use("/api", uploadRoutes);
+app.use("/api/ai", aiRoutes);
 
 const multerErrorHandler = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
@@ -36,3 +48,4 @@ const multerErrorHandler = (err, req, res, next) => {
 app.use(multerErrorHandler);
 
 export default app;
+

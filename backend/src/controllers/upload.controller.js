@@ -5,377 +5,283 @@ import {
   getColumns,
   getSchema,
   filterData,
-  groupBy,
   sortData,
   analyzeData,
   processQuery,
   summarize,
   paginate,
   getUnique,
-  countDistinct
+  countDistinct, // ✅ FIXED
 } from "../utils/dataProcessor.js";
 
-//! Convert MongoDB Map objects to plain objects
+// ✅ Convert records safely
 const convertRecordsToPlainObjects = (records) => {
   if (!Array.isArray(records)) return [];
-  
-  return records.map(record => {
-    if (record && typeof record === 'object') {
-      // If it's a Map, convert to object
+
+  return records.reduce((acc, record) => {
+    try {
+      let obj;
+
       if (record instanceof Map) {
-        return Object.fromEntries(record);
+        obj = Object.fromEntries(record);
+      } else if (record?.toObject) {
+        obj = record.toObject();
+      } else {
+        obj = { ...record };
       }
-      // If it's already an object with a toObject method (Mongoose), use it
-      if (record.toObject && typeof record.toObject === 'function') {
-        const obj = record.toObject();
-        // Remove MongoDB internal fields
-        delete obj.__v;
-        return obj;
-      }
-      // Otherwise, return as-is but clean MongoDB fields
-      const cleaned = { ...record };
-      delete cleaned.__v;
-      delete cleaned._id;
-      return cleaned;
+
+      delete obj._id;
+      delete obj.__v;
+
+      if (Object.keys(obj).length) acc.push(obj);
+    } catch (e) {
+      console.error("Conversion error:", e.message);
     }
-    return record;
-  });
+
+    return acc;
+  }, []);
 };
 
-//! Upload and parse CSV
+
+
+// ================= UPLOAD CSV =================
 export const uploadCSV = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded', success: false });
+      return res.status(400).json({ error: "No file uploaded", success: false });
     }
+
     const filePath = req.file.path;
-
     const rows = await parseCSV(filePath);
-    
-    if (rows.length === 0) {
-      return res.status(400).json({ error: 'CSV file is empty or invalid', success: false });
+
+    if (!rows.length) {
+      return res.status(400).json({ error: "Empty CSV", success: false });
     }
 
-    // Extract columns using dataProcessor
     const columns = getColumns(rows);
     const schema = getSchema(rows);
 
-    if (columns.length === 0) {
-      return res.status(400).json({ error: 'No columns found in CSV', success: false });
+    // ✅ Safe file delete
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
 
-    // Cleanup temp file after parsing
-    fs.unlinkSync(filePath);
-
-    // Store dataset with enhanced metadata
     const dataset = await Dataset.create({
       fileName: req.file.originalname,
       columns,
       schema,
       rowCount: rows.length,
-      records: rows
+      records: rows,
     });
 
-    if (!dataset.records || dataset.records.length === 0) {
-      throw new Error('Failed to save records to database');
-    }
-
     res.status(201).json({
-      message: "Upload successful",
       success: true,
       dataset: {
         id: dataset._id,
         fileName: dataset.fileName,
         rowCount: dataset.rowCount,
-        columns: columns,
-        schema: schema
-      }
+        columns,
+        schema,
+      },
     });
-
   } catch (err) {
-    console.error('❌ Upload error:', err);
+    console.error("Upload error:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-//! Analyze dataset metadata and schema
+
+
+// ================= ANALYZE =================
 export const analyzeDataset = async (req, res) => {
   try {
-    const { datasetId } = req.params;
-
-    const dataset = await Dataset.findById(datasetId);
+    const dataset = await Dataset.findById(req.params.datasetId);
     if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
+      return res.status(404).json({ error: "Dataset not found", success: false });
     }
 
     const records = convertRecordsToPlainObjects(dataset.records);
     const columns = getColumns(records);
     const schema = getSchema(records);
 
-    // Generate detailed analysis for each column
-    const columnAnalysis = columns.reduce((acc, col) => {
-      acc[col] = summarize(records, col);
-      return acc;
-    }, {});
+    const analysis = {};
+    for (const col of columns) {
+      analysis[col] = summarize(records, col);
+    }
 
-    res.status(200).json({
+    res.json({
       success: true,
       dataset: {
         id: dataset._id,
         fileName: dataset.fileName,
         rowCount: records.length,
-        columns: columns,
-        columnCount: columns.length,
-        schema: schema
+        columns,
+        schema,
       },
-      analysis: columnAnalysis
+      analysis,
     });
-
   } catch (err) {
-    console.error('❌ Analysis error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Execute complex query on dataset
+
+
+// ================= QUERY =================
 export const queryDataset = async (req, res) => {
   try {
-    const { datasetId } = req.params;
-    const { query } = req.body;
-
-    const dataset = await Dataset.findById(datasetId);
+    const dataset = await Dataset.findById(req.params.datasetId);
     if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
-    }
-
-    if (!query || typeof query !== 'object') {
-      return res.status(400).json({ error: 'Invalid query object', success: false });
+      return res.status(404).json({ error: "Dataset not found" });
     }
 
     const records = convertRecordsToPlainObjects(dataset.records);
-    const result = processQuery(records, query);
+    const result = processQuery(records, req.body.query || {});
 
-    res.status(200).json({
-      success: true,
-      datasetId: dataset._id,
-      fileName: dataset.fileName,
-      ...result
-    });
-
+    res.json({ success: true, ...result });
   } catch (err) {
-    console.error('❌ Query error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Get column-specific statistics
+
+
+// ================= COLUMN STATS =================
 export const getColumnStats = async (req, res) => {
   try {
     const { datasetId, columnName } = req.params;
 
     const dataset = await Dataset.findById(datasetId);
     if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
+      return res.status(404).json({ error: "Dataset not found" });
     }
 
     const records = convertRecordsToPlainObjects(dataset.records);
     const columns = getColumns(records);
 
     if (!columns.includes(columnName)) {
-      return res.status(404).json({ 
-        error: `Column "${columnName}" not found`, 
-        success: false,
-        availableColumns: columns 
-      });
+      return res.status(400).json({ error: "Invalid column" });
     }
 
-    const stats = summarize(records, columnName);
-    const uniqueValues = getUnique(records, columnName);
-    const distinctCount = countDistinct(records, columnName);
-
-    res.status(200).json({
+    res.json({
       success: true,
-      column: columnName,
-      statistics: stats,
-      distinctValues: distinctCount,
-      sampleValues: uniqueValues.slice(0, 10) // Show first 10 unique values
+      statistics: summarize(records, columnName),
+      distinctValues: countDistinct(records, columnName),
+      sampleValues: getUnique(records, columnName).slice(0, 10),
     });
-
   } catch (err) {
-    console.error('❌ Column stats error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Group and analyze data
+
+
+// ================= GROUP =================
 export const groupAndAnalyze = async (req, res) => {
   try {
-    const { datasetId } = req.params;
-    const { groupBy: groupField, metric: metricField } = req.body;
+    const { groupBy, metric } = req.body;
 
-    const dataset = await Dataset.findById(datasetId);
+    const dataset = await Dataset.findById(req.params.datasetId);
     if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
-    }
-
-    if (!groupField || !metricField) {
-      return res.status(400).json({ 
-        error: 'groupBy and metric fields are required', 
-        success: false 
-      });
+      return res.status(404).json({ error: "Dataset not found" });
     }
 
     const records = convertRecordsToPlainObjects(dataset.records);
     const columns = getColumns(records);
 
-    if (!columns.includes(groupField)) {
-      return res.status(400).json({ error: `Field "${groupField}" not found`, success: false });
+    if (!columns.includes(groupBy) || !columns.includes(metric)) {
+      return res.status(400).json({ error: "Invalid fields" });
     }
 
-    if (!columns.includes(metricField)) {
-      return res.status(400).json({ error: `Field "${metricField}" not found`, success: false });
-    }
+    const analysis = analyzeData(records, groupBy, metric);
 
-    const analysis = analyzeData(records, groupField, metricField);
-
-    res.status(200).json({
+    res.json({
       success: true,
-      groupBy: groupField,
-      metric: metricField,
-      analysis: analysis,
-      groupCount: Object.keys(analysis).length
+      analysis,
+      groupCount: Object.keys(analysis).length,
     });
-
   } catch (err) {
-    console.error('❌ Group analysis error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Filter and export data
+
+
+// ================= FILTER =================
 export const filterAndExport = async (req, res) => {
   try {
-    const { datasetId } = req.params;
-    const { filters, sortBy, limit, offset, format = 'json' } = req.body;
-
-    const dataset = await Dataset.findById(datasetId);
-    if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
-    }
+    const dataset = await Dataset.findById(req.params.datasetId);
+    if (!dataset) return res.status(404).json({ error: "Dataset not found" });
 
     let records = convertRecordsToPlainObjects(dataset.records);
 
-    // Apply filters if provided
-    if (filters && Array.isArray(filters) && filters.length > 0) {
-      for (const filter of filters) {
-        records = filterData(records, filter.field, filter.operator, filter.value);
-      }
-    }
+    const { filters = [], sortBy, limit = 100, offset = 0 } = req.body;
 
-    // Apply sorting if provided
+    filters.forEach(f => {
+      records = filterData(records, f.field, f.operator, f.value);
+    });
+
     if (sortBy) {
-      records = sortData(records, sortBy.field, sortBy.order || 'asc');
+      records = sortData(records, sortBy.field, sortBy.order);
     }
 
-    // Apply pagination
-    const pageSize = limit || 100;
-    const pageOffset = offset || 0;
-    const pageNumber = Math.floor(pageOffset / pageSize) + 1;
-    
-    const { data: paginatedData, totalPages, totalItems } = paginate(
-      records, 
-      pageNumber, 
-      pageSize
-    );
+    const page = Math.floor(offset / limit) + 1;
+    const { data, totalPages, totalItems } = paginate(records, page, limit);
 
-    if (format === 'csv') {
-      // Convert to CSV format
-      const columns = getColumns(paginatedData);
-      const csvRows = paginatedData.map(row =>
-        columns.map(col => {
-          const val = row[col];
-          if (val === null || val === undefined) return '';
-          return `"${String(val).replace(/"/g, '""')}"`;
-        }).join(',')
-      );
-      const csvContent = [columns.join(','), ...csvRows].join('\n');
-
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename="export_${Date.now()}.csv"`);
-      return res.send(csvContent);
-    }
-
-    // JSON response
-    res.status(200).json({
+    res.json({
       success: true,
-      data: paginatedData,
-      pagination: {
-        total: totalItems,
-        limit: pageSize,
-        offset: pageOffset,
-        page: pageNumber,
-        pages: totalPages
-      },
-      rowsReturned: paginatedData.length
+      data,
+      pagination: { totalItems, totalPages, page },
     });
 
   } catch (err) {
-    console.error('❌ Export error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Get full dataset with optional pagination
+
+
+// ================= GET DATASET =================
 export const getDataset = async (req, res) => {
   try {
-    const { datasetId } = req.params;
     const { page = 1, limit = 20 } = req.query;
 
-    const dataset = await Dataset.findById(datasetId);
-    if (!dataset) {
-      return res.status(404).json({ error: 'Dataset not found', success: false });
-    }
+    const dataset = await Dataset.findById(req.params.datasetId);
+    if (!dataset) return res.status(404).json({ error: "Dataset not found" });
 
     const records = convertRecordsToPlainObjects(dataset.records);
-    const { data, totalPages, totalItems } = paginate(records, parseInt(page), parseInt(limit));
 
-    res.status(200).json({
+    const { data, totalPages, totalItems } = paginate(
+      records,
+      Math.max(1, parseInt(page)),
+      Math.min(100, parseInt(limit))
+    );
+
+    res.json({
       success: true,
-      dataset: {
-        id: dataset._id,
-        fileName: dataset.fileName,
-        columns: dataset.columns
-      },
-      data: data,
+      data,
       pagination: {
-        currentPage: parseInt(page),
-        pageSize: parseInt(limit),
+        currentPage: Number(page),
         totalPages,
-        totalItems
-      }
+        totalItems,
+      },
     });
-
   } catch (err) {
-    console.error('❌ Fetch error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
 
-//! Get all datasets (list view)
+
+
+// ================= GET ALL =================
 export const getAllDatasets = async (req, res) => {
   try {
-    // Exclude records field to avoid Map serialization issues
     const datasets = await Dataset.find()
-      .select('_id fileName rowCount columns uploadedAt')
-      .sort({ uploadedAt: -1 })
-      .lean(); // Use lean() for better performance and to avoid Mongoose document issues
+      .select("_id fileName rowCount columns uploadedAt")
+      .lean();
 
-    res.status(200).json({
-      success: true,
-      datasets: datasets
-    });
+    res.json({ success: true, datasets });
   } catch (err) {
-    console.error('❌ Fetch error:', err);
-    res.status(500).json({ error: err.message, success: false });
+    res.status(500).json({ error: err.message });
   }
 };
