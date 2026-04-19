@@ -3,7 +3,7 @@
  * Handles natural language queries to backend AI endpoint
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE ? `${import.meta.env.VITE_API_BASE}/api/ai` : 'http://localhost:5000/api/ai';
+'http://localhost:3000/api/ai';
 
 /**
  * Send natural language query for AI analysis
