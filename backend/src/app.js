@@ -15,8 +15,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173", 
     "http://localhost:5174",
-    "https://ai-analsyst-dashboard-nilesh.onrender.com"
-  ], 
+    "https://ai-analsyst-dashboard-nilesh.onrender.com", ],
   credentials: true                
 }));
 app.use(express.json());
