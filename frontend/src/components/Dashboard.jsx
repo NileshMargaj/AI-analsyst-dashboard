@@ -5,6 +5,7 @@ import DataExporter from './DataExporter'
 import BarChartComponent from './charts/BarChart'
 import LineChartComponent from './charts/LineChart'
 import AIQuery from './AIQuery'
+import { analyzeDataset } from '../services/dataProcessorAPI.js'
 import { BiLoaderAlt } from 'react-icons/bi';
 import { FiAlertCircle } from 'react-icons/fi';
 
@@ -82,15 +83,14 @@ const Dashboard = ({ onDatasetSelect }) => {
         const ChartsView = ({ datasetId }) => {
             const [chartData, setChartData] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [chartError, setChartError] = useState(null);
 
             useEffect(() => {
                 const fetchCharts = async () => {
                     try {
-                        const token = localStorage.getItem('token');
-                        const res = await fetch(`http://localhost:3000/api/${datasetId}/analyze`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        const analysis = await res.json();
+                        setLoading(true);
+                        setChartError(null);
+                        const analysis = await analyzeDataset(datasetId);
                         // Sample chart data from analysis
                         const barData = Object.entries(analysis.analysis || {}).slice(0, 5).map(([col, stats]) => ({
                             name: col,
@@ -99,6 +99,7 @@ const Dashboard = ({ onDatasetSelect }) => {
                         setChartData(barData);
                     } catch (err) {
                         console.error('Charts load error:', err);
+                        setChartError(err.message);
                     } finally {
                         setLoading(false);
                     }
@@ -106,10 +107,34 @@ const Dashboard = ({ onDatasetSelect }) => {
                 if (datasetId) fetchCharts();
             }, [datasetId]);
 
+            if (loading) {
+                return (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-80">
+                        <div className="flex items-center justify-center bg-gray-900/50 rounded-lg">
+                            <BiLoaderAlt className="animate-spin text-2xl text-gray-400" />
+                        </div>
+                        <div className="flex items-center justify-center bg-gray-900/50 rounded-lg">
+                            <BiLoaderAlt className="animate-spin text-2xl text-gray-400" />
+                        </div>
+                    </div>
+                );
+            }
+
+            if (chartError) {
+                return (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-80">
+                        <div className="flex items-center justify-center bg-red-900/20 border border-red-500/50 rounded-lg p-8 text-red-300">
+                            <FiAlertCircle className="w-8 h-8 mr-2" />
+                            <span>Charts unavailable: {chartError}</span>
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <BarChartComponent data={chartData} loading={loading} title="📊 Column Averages" />
-                    <LineChartComponent data={chartData} loading={loading} title="📈 Data Trends" />
+                    <BarChartComponent data={chartData} loading={false} title="📊 Column Averages" />
+                    <LineChartComponent data={chartData} loading={false} title="📈 Data Trends" />
                 </div>
             );
         };
@@ -119,7 +144,6 @@ const Dashboard = ({ onDatasetSelect }) => {
                 return <AIQuery datasetId={selectedDataset} />;
             case 'analytics':
                 return <DataAnalytics datasetId={selectedDataset} />;
-
             case 'query':
                 return <AdvancedQuery datasetId={selectedDataset} />;
             case 'export':
