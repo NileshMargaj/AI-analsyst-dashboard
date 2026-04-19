@@ -10,8 +10,13 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 //! Middleware
+// TODO: Update origins array with your production frontend URL (e.g. https://yourapp.onrender.com) after frontend deploy
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174"], 
+  origin: [
+    "http://localhost:5173", 
+    "http://localhost:5174",
+    "https://your-frontend.onrender.com"
+  ], 
   credentials: true                
 }));
 app.use(express.json());
