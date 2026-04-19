@@ -3,7 +3,9 @@
  * Service layer for all data processing APIs
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
+const API_BASE = import.meta.env.DEV 
+  ? 'http://localhost:3000/api' 
+  : (import.meta.env.VITE_API_BASE || 'https://ai-analsyst-dashboard-backend.onrender.com/api');
 
 // Get auth token from localStorage
 const getAuthToken = () => {

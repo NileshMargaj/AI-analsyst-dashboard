@@ -3,7 +3,9 @@
  * Handles natural language queries to backend AI endpoint
  */
 
-'http://localhost:3000/api/ai';
+const API_BASE = import.meta.env.DEV 
+  ? 'http://localhost:3000/api/ai' 
+  : (import.meta.env.VITE_API_BASE ? `${import.meta.env.VITE_API_BASE}/api/ai` : 'https://ai-analsyst-dashboard-backend.onrender.com/api/ai');
 
 /**
  * Send natural language query for AI analysis
