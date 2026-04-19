@@ -57,7 +57,7 @@ export const uploadCSV = async (file) => {
  * Get dataset with pagination
  */
 export const getDataset = async (datasetId, page = 1, limit = 20) => {
-  const url = new URL(`${API_BASE}/${datasetId}`);
+  const url = new URL(`${API_BASE}/api/${datasetId}`);
   url.searchParams.append('page', page);
   url.searchParams.append('limit', limit);
 
@@ -75,7 +75,7 @@ export const getDataset = async (datasetId, page = 1, limit = 20) => {
  */
 export const analyzeDataset = async (datasetId) => {
   const response = await fetch(
-    `${API_BASE}/${datasetId}/analyze`,
+    `${API_BASE}/api/${datasetId}/analyze`,
     getFetchOptions()
   );
 
@@ -91,7 +91,7 @@ export const analyzeDataset = async (datasetId) => {
  */
 export const getColumnStats = async (datasetId, columnName) => {
   const response = await fetch(
-    `${API_BASE}/${datasetId}/column/${columnName}/stats`,
+    `${API_BASE}/api/${datasetId}/column/${columnName}/stats`,
     getFetchOptions()
   );
 
@@ -107,7 +107,7 @@ export const getColumnStats = async (datasetId, columnName) => {
  */
 export const groupAndAnalyze = async (datasetId, groupBy, metric) => {
   const response = await fetch(
-    `${API_BASE}/${datasetId}/group`,
+    `${API_BASE}/api/${datasetId}/group`,
     getFetchOptions('POST', {
       groupBy,
       metric
@@ -126,7 +126,7 @@ export const groupAndAnalyze = async (datasetId, groupBy, metric) => {
  */
 export const queryDataset = async (datasetId, query) => {
   const response = await fetch(
-    `${API_BASE}/${datasetId}/query`,
+    `${API_BASE}/api/${datasetId}/query`,
     getFetchOptions('POST', {
       query
     })
@@ -144,7 +144,7 @@ export const queryDataset = async (datasetId, query) => {
  */
 export const exportData = async (datasetId, filters, sortBy, limit, offset, format = 'json') => {
   const response = await fetch(
-    `${API_BASE}/${datasetId}/export`,
+    `${API_BASE}/api/${datasetId}/export`,
     getFetchOptions('POST', {
       filters,
       sortBy,
@@ -182,3 +182,4 @@ export const downloadCSV = async (datasetId, filters, sortBy, limit, offset) => 
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
 };
+
