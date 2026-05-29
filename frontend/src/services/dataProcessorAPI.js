@@ -3,9 +3,11 @@
  * Service layer for all data processing APIs
  */
 
-const API_BASE = import.meta.env.DEV 
-  ? 'http://localhost:3000/api' 
-  : (import.meta.env.VITE_API_BASE || 'https://ai-analsyst-dashboard-backend.onrender.com/api');
+// IMPORTANT: API_BASE is the backend HOST ONLY.
+// All paths below must start with /api/... exactly once.
+const API_BASE = import.meta.env.DEV
+  ? 'http://localhost:3000'
+  : (import.meta.env.VITE_API_BASE || 'https://ai-analsyst-dashboard-backend.onrender.com');
 
 // Get auth token from localStorage
 const getAuthToken = () => {
@@ -37,7 +39,7 @@ export const uploadCSV = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_BASE}/upload`, {
+  const response = await fetch(`${API_BASE}/api/upload`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${getAuthToken()}`
@@ -159,7 +161,6 @@ export const exportData = async (datasetId, filters, sortBy, limit, offset, form
   }
 
   if (format === 'csv') {
-    // For CSV, return blob
     return response.blob();
   }
 
@@ -171,8 +172,7 @@ export const exportData = async (datasetId, filters, sortBy, limit, offset, form
  */
 export const downloadCSV = async (datasetId, filters, sortBy, limit, offset) => {
   const blob = await exportData(datasetId, filters, sortBy, limit, offset, 'csv');
-  
-  // Create download link
+
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
