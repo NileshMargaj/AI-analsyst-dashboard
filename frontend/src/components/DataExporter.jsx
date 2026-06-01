@@ -54,7 +54,7 @@ const DataExporter = ({ datasetId }) => {
     <div className="w-full space-y-4">
       <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700 space-y-4">
         <h3 className="text-white font-semibold text-lg mb-4">Export Dataset</h3>
-        
+
         <div className="bg-[#0B0D12] p-4 rounded-lg text-sm text-gray-400">
           <p><span className="text-violet-400 font-semibold">{rowCount.toLocaleString()}</span> total rows</p>
           <p>Preview shows first 5 rows, export downloads all rows as CSV</p>

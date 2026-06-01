@@ -6,6 +6,8 @@ import userRoutes from "./routes/user.routes.js";
 import multer from 'multer';
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
@@ -13,10 +15,11 @@ const app = express();
 // TODO: Update origins array with your production frontend URL (e.g. https://yourapp.onrender.com) after frontend deploy
 app.use(cors({
   origin: [
-    "http://localhost:5173", 
+    "http://localhost:5173",
     "http://localhost:5174",
-    "https://ai-analsyst-dashboard-nilesh.onrender.com", ],
-  credentials: true                
+    process.env.FRONTEND_URL
+    ,],
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

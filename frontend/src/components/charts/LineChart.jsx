@@ -38,7 +38,7 @@ const LineChartComponent = ({ data = [], loading = false, error = null, title = 
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-            <Tooltip 
+            <Tooltip
               contentStyle={{
                 backgroundColor: '#1F2937',
                 border: '1px solid #4B5563',

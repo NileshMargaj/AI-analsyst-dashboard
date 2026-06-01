@@ -6,7 +6,7 @@ const NotFound = () => {
   return (
     <div className="h-screen w-full flex items-center justify-center bg-[#0B0D12] px-4">
       <div className="text-center bg-[#0F1117] border border-[#1C1F2E] rounded-xl p-8 shadow-md max-w-lg w-full">
-        
+
         {/* Icon */}
         <FiAlertTriangle className="mx-auto text-5xl text-[#6C63FF] mb-4" />
 

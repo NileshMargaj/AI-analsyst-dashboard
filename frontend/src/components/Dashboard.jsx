@@ -24,21 +24,21 @@ const Dashboard = ({ onDatasetSelect }) => {
         try {
             setLoadingDatasets(true);
             const token = localStorage.getItem('token');
-            
+
             if (!token) {
                 setError('Please login first to access datasets');
                 setLoadingDatasets(false);
                 return;
             }
 
-            const response = await fetch('http://localhost:3000/api/uploads', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/uploads`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 if (response.status === 401) {
                     setError('Unauthorized: Please login again');
@@ -48,10 +48,10 @@ const Dashboard = ({ onDatasetSelect }) => {
                 }
                 return;
             }
-            
+
             const data = await response.json();
             setDatasets(data.datasets || []);
-            
+
             if (data.datasets && data.datasets.length > 0) {
                 const firstDatasetId = data.datasets[0]._id;
                 setSelectedDataset(firstDatasetId);
@@ -200,11 +200,10 @@ const Dashboard = ({ onDatasetSelect }) => {
                             <button
                                 key={view.id}
                                 onClick={() => setActiveView(view.id)}
-                                className={`px-6 py-3 whitespace-nowrap text-sm font-medium transition-all flex items-center gap-2 ${
-                                    activeView === view.id
+                                className={`px-6 py-3 whitespace-nowrap text-sm font-medium transition-all flex items-center gap-2 ${activeView === view.id
                                         ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg'
                                         : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
-                                }`}
+                                    }`}
                             >
                                 <span>{view.icon}</span>
                                 <span>{view.label}</span>
@@ -219,7 +218,7 @@ const Dashboard = ({ onDatasetSelect }) => {
                 <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/30 p-12 rounded-2xl text-center">
                     <h2 className="text-2xl font-bold text-white mb-4">🤖 AI Analytics Dashboard</h2>
                     <p className="text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
-                        Upload your CSV data and ask questions in plain English. 
+                        Upload your CSV data and ask questions in plain English.
                         Get instant charts, insights, and analysis powered by AI.
                     </p>
                     <div className="bg-[#1A1D26] p-8 rounded-xl border border-gray-700 max-w-2xl mx-auto">

@@ -5,9 +5,7 @@
 
 // IMPORTANT: API_BASE is the backend HOST ONLY.
 // All paths below must start with /api/... exactly once.
-const API_BASE = import.meta.env.DEV
-  ? 'http://localhost:3000'
-  : (import.meta.env.VITE_API_BASE || 'https://ai-analsyst-dashboard-backend.onrender.com');
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 // Get auth token from localStorage
 const getAuthToken = () => {

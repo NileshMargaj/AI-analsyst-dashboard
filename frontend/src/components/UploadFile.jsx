@@ -47,7 +47,7 @@ const UploadFile = () => {
 
     try {
       setStatus('Uploading...');
-      const response = await fetch('http://localhost:3000/api/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -72,7 +72,7 @@ const UploadFile = () => {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-[500px] sm:min-h-[550px]">
+    <div className="w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 h-full">
       <section className='w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-[#0F1117] to-[#0B0D12] border border-[#1C1F2E]/50 backdrop-blur-sm'>
 
         {/* Header Section */}
@@ -113,13 +113,12 @@ const UploadFile = () => {
 
             {/* Status Message */}
             {status && (
-              <div className={`px-4 py-3 rounded-lg text-sm font-medium text-center max-w-xs ${
-                isSuccess === null
+              <div className={`px-4 py-3 rounded-lg text-sm font-medium text-center max-w-xs ${isSuccess === null
                   ? "text-[#9B94FF] bg-[#6C63FF]/10 border border-[#6C63FF]/30"
                   : isSuccess
                     ? "text-green-400 bg-green-500/10 border border-green-500/30"
                     : "text-red-400 bg-red-500/10 border border-red-500/30"
-              }`}>
+                }`}>
                 {status}
               </div>
             )}

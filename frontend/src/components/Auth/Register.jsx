@@ -21,14 +21,21 @@ const Register = ({ onSuccess }) => {
     setStatus('');
 
     try {
-      const response = await fetch('http://localhost:3000/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
         credentials: 'include',
       });
 
-      const data = await response.json();
+      // Backend might return empty/non-JSON body (e.g., 404), so parse safely
+      let data = null;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
 
       if (response.ok) {
         setStatus('Registration successful! You can now login.');
@@ -46,7 +53,7 @@ const Register = ({ onSuccess }) => {
   };
 
   return (
-    <div className="h-[70%] w-[40%] flex items-center justify-center bg-[#0B0D12] p-5">
+    <div className="min-h-[70%] w-full flex items-center justify-center bg-[#0B0D12] p-5">
       <div className="w-full max-w-md bg-[#0F1117] border border-[#1C1F2E] rounded-lg shadow-sm p-3">
         <div className="text-center mb-3">
           <FiUserPlus className="mx-auto text-3xl text-[#6C63FF] mb-1" />

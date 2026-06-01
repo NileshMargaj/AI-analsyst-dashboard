@@ -70,111 +70,111 @@ const DataAnalytics = ({ datasetId }) => {
     <>
       <style>{hideScrollbarStyle}</style>
       <div className="w-full space-y-4">
-      {/* Dataset Overview */}
-      <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
-        <h3 className="text-white font-semibold mb-4">Dataset Overview</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0B0D12] p-4 rounded-lg">
-            <p className="text-gray-400 text-sm">File Name</p>
-            <p className="text-white font-medium mt-1 truncate">{dataset.fileName}</p>
-          </div>
-          <div className="bg-[#0B0D12] p-4 rounded-lg">
-            <p className="text-gray-400 text-sm">Total Rows</p>
-            <p className="text-white font-medium mt-1">{dataset.rowCount.toLocaleString()}</p>
-          </div>
-          <div className="bg-[#0B0D12] p-4 rounded-lg">
-            <p className="text-gray-400 text-sm">Columns</p>
-            <p className="text-white font-medium mt-1">{datasetColumnCount}</p>
-          </div>
-          <div className="bg-[#0B0D12] p-4 rounded-lg">
-            <p className="text-gray-400 text-sm">Data Type</p>
-            <p className="text-white font-medium mt-1">CSV</p>
+        {/* Dataset Overview */}
+        <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
+          <h3 className="text-white font-semibold mb-4">Dataset Overview</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[#0B0D12] p-4 rounded-lg">
+              <p className="text-gray-400 text-sm">File Name</p>
+              <p className="text-white font-medium mt-1 truncate">{dataset.fileName}</p>
+            </div>
+            <div className="bg-[#0B0D12] p-4 rounded-lg">
+              <p className="text-gray-400 text-sm">Total Rows</p>
+              <p className="text-white font-medium mt-1">{dataset.rowCount.toLocaleString()}</p>
+            </div>
+            <div className="bg-[#0B0D12] p-4 rounded-lg">
+              <p className="text-gray-400 text-sm">Columns</p>
+              <p className="text-white font-medium mt-1">{datasetColumnCount}</p>
+            </div>
+            <div className="bg-[#0B0D12] p-4 rounded-lg">
+              <p className="text-gray-400 text-sm">Data Type</p>
+              <p className="text-white font-medium mt-1">CSV</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Column Analysis */}
-      <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
-        <h3 className="text-white font-semibold mb-4">Column Statistics</h3>
-        <div className="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
-{columns.map((col) => {
-            const stats = columnAnalysis[col];
-            if (!stats) return null;
+        {/* Column Analysis */}
+        <div className="bg-[#1A1D26] rounded-lg p-6 border border-gray-700">
+          <h3 className="text-white font-semibold mb-4">Column Statistics</h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+            {columns.map((col) => {
+              const stats = columnAnalysis[col];
+              if (!stats) return null;
 
-            return (
-              <div key={col} className="bg-[#0B0D12] p-4 rounded-lg border border-gray-700/50">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-white font-medium">{col}</p>
-                    <p className="text-gray-400 text-sm">Type: {stats.type || 'string'}</p>
+              return (
+                <div key={col} className="bg-[#0B0D12] p-4 rounded-lg border border-gray-700/50">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-white font-medium">{col}</p>
+                      <p className="text-gray-400 text-sm">Type: {stats.type || 'string'}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 bg-violet-500/20 text-violet-400 rounded">
+                      {stats.type || 'string'}
+                    </span>
                   </div>
-                  <span className="text-xs px-2 py-1 bg-violet-500/20 text-violet-400 rounded">
-                    {stats.type || 'string'}
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                  <div>
-                    <p className="text-gray-500 text-xs">Total</p>
-                    <p className="text-gray-300">{stats.count}</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                    <div>
+                      <p className="text-gray-500 text-xs">Total</p>
+                      <p className="text-gray-300">{stats.count}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs">Missing</p>
+                      <p className={stats.missing > 0 ? 'text-yellow-400' : 'text-green-400'}>
+                        {stats.missing || 0}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs">Distinct</p>
+                      <p className="text-gray-300">{stats.distinct}</p>
+                    </div>
+                    {stats.type === 'number' && (
+                      <>
+                        <div>
+                          <p className="text-gray-500 text-xs">Average</p>
+                          <p className="text-gray-300">
+                            {typeof stats.average === 'number' ? stats.average.toFixed(2) : 'N/A'}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Missing</p>
-                    <p className={stats.missing > 0 ? 'text-yellow-400' : 'text-green-400'}>
-                      {stats.missing || 0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Distinct</p>
-                    <p className="text-gray-300">{stats.distinct}</p>
-                  </div>
-                  {stats.type === 'number' && (
-                    <>
-                      <div>
-                        <p className="text-gray-500 text-xs">Average</p>
-                        <p className="text-gray-300">
-                          {typeof stats.average === 'number' ? stats.average.toFixed(2) : 'N/A'}
-                        </p>
+
+                  {stats.topValues && (
+                    <div className="mt-3 pt-3 border-t border-gray-700">
+                      <p className="text-gray-500 text-xs mb-1">Top Values</p>
+                      <div className="space-y-1">
+                        {stats.topValues.map(({ value, count }) => (
+                          <div key={value} className="text-xs text-gray-300 flex justify-between">
+                            <span>{String(value)}</span>
+                            <span className="text-violet-400 font-medium">({count})</span>
+                          </div>
+                        ))}
                       </div>
-                    </>
+                    </div>
+                  )}
+                  {stats.average !== undefined && (
+                    <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-3 gap-2 text-sm">
+                      <div>
+                        <p className="text-gray-500 text-xs">Avg</p>
+                        <p className="text-gray-300">{stats.average.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs">Min</p>
+                        <p className="text-gray-300">{stats.min.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs">Max</p>
+                        <p className="text-gray-300">{stats.max.toFixed(2)}</p>
+                      </div>
+                    </div>
                   )}
                 </div>
-
-{stats.topValues && (
-  <div className="mt-3 pt-3 border-t border-gray-700">
-    <p className="text-gray-500 text-xs mb-1">Top Values</p>
-    <div className="space-y-1">
-      {stats.topValues.map(({value, count}) => (
-        <div key={value} className="text-xs text-gray-300 flex justify-between">
-          <span>{String(value)}</span>
-          <span className="text-violet-400 font-medium">({count})</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-{stats.average !== undefined && (
-  <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-3 gap-2 text-sm">
-    <div>
-      <p className="text-gray-500 text-xs">Avg</p>
-      <p className="text-gray-300">{stats.average.toFixed(2)}</p>
-    </div>
-    <div>
-      <p className="text-gray-500 text-xs">Min</p>
-      <p className="text-gray-300">{stats.min.toFixed(2)}</p>
-    </div>
-    <div>
-      <p className="text-gray-500 text-xs">Max</p>
-      <p className="text-gray-300">{stats.max.toFixed(2)}</p>
-    </div>
-  </div>
-)}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

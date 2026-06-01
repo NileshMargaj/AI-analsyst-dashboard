@@ -39,7 +39,7 @@ const AIQuery = ({ datasetId }) => {
 
     // Dynamic chart type based on operation
     const operation = result.structuredQuery?.operation || 'bar';
-    
+
     switch (operation) {
       case 'trend':
         return <LineChartComponent data={result.chartData} title="📈 Trend Analysis" />;
@@ -62,27 +62,29 @@ const AIQuery = ({ datasetId }) => {
   return (
     <div className="space-y-6">
       {/* Query Input */}
-      <form onSubmit={handleSubmit} className="bg-[#1A1D26] p-6 rounded-xl border border-gray-700">
-        <div className="flex gap-3">
+      <form onSubmit={handleSubmit} className="bg-[#1A1D26] p-6 rounded-xl border border-gray-700 w-full overflow-hidden">
+        <div className="flex gap-2 items-center w-full">
           <input
+            className="min-w-0"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ask anything about your data... e.g. 'Top 5 products by sales'"
-            className="flex-1 bg-[#0B0D12] border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:outline-none transition"
+            className="w-[70%] sm:w-[85%] sm:flex-1 bg-[#0B0D12] border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:outline-none transition"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-all disabled:cursor-not-allowed"
+            className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 p-3 sm:px-6 sm:py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed whitespace-nowrap shrink-0"
+            style={{ maxWidth: '120px' }}
           >
             {loading ? (
               <BiLoaderAlt className="animate-spin w-4 h-4" />
             ) : (
               <BiSearch className="w-4 h-4" />
             )}
-            {loading ? 'Analyzing...' : 'Run'}
+            {loading ? 'Analyzing...' : ''}
           </button>
         </div>
 
