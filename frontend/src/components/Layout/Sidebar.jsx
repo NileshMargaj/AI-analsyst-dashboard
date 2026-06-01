@@ -18,7 +18,7 @@ const Sidebar = ({ variant = 'desktop', onClose = null }) => {
     <aside className={"" + wrapperClass + " bg-[#0B0D12] border-r border-[#1C1F2E] flex flex-col shrink-0"}
     >
       {/* Top Header / Branding area (desktop only) */}
-      <div className="px-6 py-8 flex items-center gap-3  md:flex">
+      <div className="hidden md:flex px-6 py-8 items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#0B0D12] border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/10">
           <img src={projectLogo} alt="Project Logo" className="w-6 h-6" />
         </div>
@@ -26,6 +26,7 @@ const Sidebar = ({ variant = 'desktop', onClose = null }) => {
           <h1 className="text-xl font-bold text-white tracking-tight">Analyst<span className="text-violet-400">AI</span></h1>
         </div>
       </div>
+
 
       {/* Scrollable Navigation Area */}
       <div className="flex flex-col flex-1 overflow-y-auto px-4 py-2">
